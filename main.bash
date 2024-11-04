@@ -24,6 +24,30 @@ git pull origin david-t
 # Obtener los últimos cambios de la rama main
 git fetch origin main
 
+# Verificar si hay cambios sin comitear
+$changes = git status -s
+if ($changes) {
+    # Preguntar al usuario si desea hacer stash de los cambios
+    $stashResponse = Read-Host "¿Hay cambios sin comitear. Desea hacer stash? (s/n)"
+
+    if ($stashResponse -eq "s") {
+        # Pedir al usuario un mensaje para el stash (opcional)
+        $stashMessage = Read-Host "Ingrese un mensaje para el stash (opcional):"
+
+        # Hacer stash de los cambios con el mensaje proporcionado o uno por defecto
+        if ($stashMessage) {
+            git stash push -u -m "$stashMessage"
+            Write-Host "Cambios guardados en stash con mensaje: '$stashMessage'"
+        } else {
+            git stash push -u -m "Cambios guardados antes de la fusión con main"
+            Write-Host "Cambios guardados en stash con mensaje por defecto."
+        }
+    } else {
+        Write-Host "Abortando la fusión debido a cambios sin comitear."
+        exit 1
+    }
+}
+
 # Resetear la rama DavidTalavera al último commit de main
 git reset --soft origin/main
 
@@ -49,11 +73,11 @@ if ($last_commit_message -like "*Versión*") {
         $parts = $version -split '\.'
         $parts[-1] = [int]$parts[-1] + 1  # Incrementar el último número
         $new_version = ($parts -join '.')
-        
+
         # Crear un nuevo commit con la nueva versión
         git commit --allow-empty -m "Versión $new_version (Unión de main y david-t)"
         git push origin david-t
-        
+
         Write-Host "Fusión completada y versión actualizada a: Versión $new_version"
     } else {
         Write-Host "No se encontró una versión válida después de 'Versión'."

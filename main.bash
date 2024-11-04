@@ -19,7 +19,7 @@ if (-not $branchMain) {
 git checkout david-t
 
 # Pull de la rama DavidTalavera
-git pull origin david-t
+git pull origin david-t --rebase 
 
 # Obtener los últimos cambios de la rama main
 git fetch origin main
